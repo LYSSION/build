@@ -1,0 +1,48 @@
+name: Build Armbian Image
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git curl wget xz-utils zip unzip \
+            device-tree-compiler libncurses-dev \
+            qemu-user-static binfmt-support \
+            gcc-aarch64-linux-gnu bc bison flex \
+            python3 python3-pyelftools \
+            build-essential libssl-dev \
+            debootstrap libarchive-tools \
+            pigz p7zip-full
+
+      - name: Build Armbian image
+        run: |
+          ./compile.sh \
+            BOARD=atompi \
+            BRANCH=current \
+            RELEASE=bookworm \
+            BUILD_MINIMAL=yes \
+            BUILD_DESKTOP=no \
+            KERNEL_CONFIGURE=no \
+            IMAGES_FORCE_PARTITION=yes \
+            COMPRESS_OUTPUTIMAGE=xz
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          files: ./output/images/*
