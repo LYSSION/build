@@ -34,6 +34,8 @@ jobs:
             BOARD=rock-3a \
             BRANCH=vendor \
             BUILD_MINIMAL=yes \
+            RELEASE=trixie \
+            KERNEL_CONFIGURE=no \
             BUILD_DESKTOP=no \
             COMPRESS_OUTPUTIMAGE=xz
 
