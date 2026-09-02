@@ -1,0 +1,36 @@
+diff --git a/arch/arm/mach-rockchip/fit_nodes.sh b/arch/arm/mach-rockchip/fit_nodes.sh
+index c9cc4669632..a3b98f6f56e 100755
+--- a/arch/arm/mach-rockchip/fit_nodes.sh
++++ b/arch/arm/mach-rockchip/fit_nodes.sh
+@@ -173,7 +173,7 @@ function gen_bl32_node()
+ 			ENTRY="entry = <"${TEE_LOAD_ADDR}">;"
+ 
+ 			# if disable packing tee.bin
+-			if ! grep -q '^CONFIG_SPL_OPTEE=y' .config ; then
++			if [ ! -s tee.bin ]; then
+ 				return
+ 			fi
+ 
+diff --git a/arch/arm/mach-rockchip/make_fit_atf.sh b/arch/arm/mach-rockchip/make_fit_atf.sh
+index 045273e3bd0..eb3d463d889 100755
+--- a/arch/arm/mach-rockchip/make_fit_atf.sh
++++ b/arch/arm/mach-rockchip/make_fit_atf.sh
+@@ -8,9 +8,17 @@
+ source ./${srctree}/arch/arm/mach-rockchip/fit_nodes.sh
+ 
+ gen_header
++rm -f tee.bin
++if [ -n "$BL32" ]; then
++	if [ ! -f "$BL32" ]; then
++		echo "ERROR: BL32 firmware not found: $BL32" >&2
++		exit 1
++	fi
++	cp "$BL32" tee.bin
++fi
+ gen_uboot_node
+ gen_bl31_node
+-#gen_bl32_node
++gen_bl32_node
+ gen_mcu_node
+ gen_loadable_node
+ gen_kfdt_node

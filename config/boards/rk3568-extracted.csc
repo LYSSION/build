@@ -1,0 +1,12 @@
+# RK3568 board reconstructed from /home/wang/extracted_dtb backup
+BOARD_NAME="RK3568 Extracted"
+BOARD_VENDOR="custom"
+BOARDFAMILY="rk35xx"
+BOARD_MAINTAINER="local"
+KERNEL_TARGET="vendor"
+KERNEL_TEST_TARGET="vendor"
+BOOTCONFIG="rk3568-extracted_defconfig"
+BOOT_SOC="rk3568"
+BOOT_FDT_FILE="rockchip/rk3568-extracted.dtb"
+BOOT_SCENARIO="spl-blobs"
+IMAGE_PARTITION_TABLE="gpt"

@@ -1,0 +1,49 @@
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/rockchip.h>
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+&{/} {
+    wifi_regon: wifi-regon {
+		compatible = "regulator-fixed";
+		regulator-name = "wifi_regon";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		enable-active-high;
+		regulator-boot-on;
+		regulator-always-on;
+		gpio = <&gpio0 RK_PC0 GPIO_ACTIVE_HIGH>;
+	};
+
+	bt_regon: bt-regon {
+		compatible = "regulator-fixed";
+		regulator-name = "bt_regon";
+		regulator-boot-on;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		enable-active-high;
+        regulator-always-on;
+		gpio = <&gpio0 RK_PC1 GPIO_ACTIVE_HIGH>;
+	};
+
+    vcc3v3_pcie20_wifi: vcc3v3-pcie20-wifi-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc3v3_pcie20_wifi";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		enable-active-high;
+		gpio = <&gpio3 RK_PA2 GPIO_ACTIVE_HIGH>;
+		vin-supply = <&vcc3v3_pcie>;
+	};
+};
+
+&pcie2x1 {
+	//pinctrl-names = "default";
+	//pinctrl-0 = <&pcie20m2_pins>;
+	reset-gpios = <&gpio1 RK_PB2 GPIO_ACTIVE_HIGH>;
+	vpcie3v3-supply = <&vcc3v3_pcie20_wifi>;
+	status = "okay";
+};

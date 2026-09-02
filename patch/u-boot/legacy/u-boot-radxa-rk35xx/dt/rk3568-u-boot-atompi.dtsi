@@ -1,0 +1,549 @@
+/*
+ * (C) Copyright 2020 Rockchip Electronics Co., Ltd
+ *
+ * SPDX-License-Identifier:     GPL-2.0+
+ */
+
+/ {
+	aliases {
+		ethernet0 = &gmac0;
+		ethernet1 = &gmac1;
+		mmc0 = &sdhci;
+		mmc1 = &sdmmc0;
+		mmc2 = &sdmmc1;
+	};
+
+	chosen {
+		stdout-path = &uart2;
+		u-boot,spl-boot-order = &sdmmc0, &sdhci, &spi_nand, &spi_nor;
+	};
+
+	secure-otp@fe3a0000 {
+		compatible = "rockchip,rk3568-secure-otp";
+		reg = <0x0 0xfe3a0000 0x0 0x4000>;
+		secure_conf = <0xfdd18008>;
+		mask_addr = <0xfe880000>;
+		cru_rst_addr = <0xfdd20470>;
+		u-boot,dm-spl;
+	};
+
+	otp: otp@fe38c000 {
+		compatible = "rockchip,rk3568-otp";
+		reg = <0x0 0xfe38c000 0x0 0x4000>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+		clocks = <&cru CLK_OTPC_NS_USR>, <&cru CLK_OTPC_NS_SBPI>,
+			 <&cru PCLK_OTPC_NS>, <&cru PCLK_OTPPHY>;
+		clock-names = "usr", "sbpi", "apb", "phy";
+		resets = <&cru SRST_OTPPHY>;
+		reset-names = "otp_phy";
+
+		/* Data cells */
+		cpu_code: cpu-code@2 {
+			reg = <0x02 0x2>;
+		};
+		otp_cpu_version: cpu-version@8 {
+			reg = <0x08 0x1>;
+			bits = <3 3>;
+		};
+		mbist_vmin: mbist-vmin@9 {
+			reg = <0x09 0x1>;
+			bits = <0 4>;
+		};
+		otp_id: id@a {
+			reg = <0x0a 0x10>;
+		};
+		cpu_leakage: cpu-leakage@1a {
+			reg = <0x1a 0x1>;
+		};
+		log_leakage: log-leakage@1b {
+			reg = <0x1b 0x1>;
+		};
+		npu_leakage: npu-leakage@1c {
+			reg = <0x1c 0x1>;
+		};
+		gpu_leakage: gpu-leakage@1d {
+			reg = <0x1d 0x1>;
+		};
+		core_pvtm:core-pvtm@2a {
+			reg = <0x2a 0x2>;
+		};
+		cpu_tsadc_trim_l: cpu-tsadc-trim-l@2e {
+			reg = <0x2e 0x1>;
+		};
+		cpu_tsadc_trim_h: cpu-tsadc-trim-h@2f {
+			reg = <0x2f 0x1>;
+			bits = <0 4>;
+		};
+		gpu_tsadc_trim_l: npu-tsadc-trim-l@30 {
+			reg = <0x30 0x1>;
+		};
+		gpu_tsadc_trim_h: npu-tsadc-trim-h@31 {
+			reg = <0x31 0x1>;
+			bits = <0 4>;
+		};
+		tsadc_trim_base_frac: tsadc-trim-base-frac@31 {
+			reg = <0x31 0x1>;
+			bits = <4 4>;
+		};
+		tsadc_trim_base: tsadc-trim-base@32 {
+			reg = <0x32 0x1>;
+		};
+		cpu_opp_info: cpu-opp-info@36 {
+			reg = <0x36 0x6>;
+		};
+		gpu_opp_info: gpu-opp-info@3c {
+			reg = <0x3c 0x6>;
+		};
+		npu_opp_info: npu-opp-info@42 {
+			reg = <0x42 0x6>;
+		};
+		dmc_opp_info: dmc-opp-info@48 {
+			reg = <0x48 0x6>;
+		};
+	};
+
+	firmware {
+		scmi: scmi {
+			compatible = "arm,scmi-smc";
+			shmem = <&scmi_shmem>;
+			arm,smc-id = <0x82000010>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			scmi_clk: protocol@14 {
+				reg = <0x14>;
+				#clock-cells = <1>;
+
+				rockchip,clk-init = <1104000000>;
+			};
+		};
+
+		sdei: sdei {
+			compatible = "arm,sdei-1.0";
+			method = "smc";
+		};
+	};
+
+	scmi_shmem: scmi-shmem@10f000 {
+		compatible = "arm,scmi-shmem";
+		reg = <0x0 0x0010f000 0x0 0x100>;
+	};
+};
+
+&psci {
+	status = "okay";
+};
+
+&crypto {
+	u-boot,dm-spl;
+};
+
+&uart2 {
+	clock-frequency = <24000000>;
+	u-boot,dm-spl;
+	/delete-property/ pinctrl-names;
+	/delete-property/ pinctrl-0;
+	status = "okay";
+};
+
+&grf {
+	u-boot,dm-spl;
+	status = "okay";
+};
+
+&pmugrf {
+	u-boot,dm-spl;
+	status = "okay";
+};
+
+&u2phy0_host {
+	phy-supply = <&vcc5v0_host>;
+	status = "okay";
+};
+
+&u2phy0_otg {
+	vbus-supply = <&vcc5v0_otg>;
+	status = "okay";
+};
+
+&u2phy1_host {
+	phy-supply = <&vcc5v0_host>;
+	status = "okay";
+};
+
+&u2phy1_otg {
+	phy-supply = <&vcc5v0_host>;
+	status = "okay";
+};
+
+&usb2phy0 {
+	status = "okay";
+};
+
+&usb2phy1 {
+	status = "okay";
+};
+
+&usb_host0_ehci {
+	status = "okay";
+};
+
+&usb_host0_ohci {
+	status = "okay";
+};
+
+&usb_host1_ehci {
+	status = "okay";
+};
+
+&usb_host1_ohci {
+	status = "okay";
+};
+
+&usbdrd_dwc3 {
+	status = "okay";
+};
+
+&usbdrd30 {
+	status = "okay";
+};
+
+&usbhost_dwc3 {
+	status = "okay";
+};
+
+&usbhost30 {
+	status = "okay";
+};
+
+&combphy0_us {
+	status = "okay";
+};
+
+&combphy1_usq {
+	status = "okay";
+};
+
+&cru {
+	u-boot,dm-spl;
+	status = "okay";
+};
+
+&pmucru {
+	u-boot,dm-spl;
+	status = "okay";
+};
+
+&rng {
+	
+	status = "okay";
+};
+
+&sfc {
+	u-boot,dm-spl;
+	/delete-property/ pinctrl-names;
+	/delete-property/ pinctrl-0;
+	/delete-property/ assigned-clocks;
+	/delete-property/ assigned-clock-rates;
+	status = "okay";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+	spi_nand: flash@0 {
+		u-boot,dm-spl;
+		compatible = "spi-nand";
+		reg = <0>;
+		spi-tx-bus-width = <1>;
+		spi-rx-bus-width = <4>;
+		spi-max-frequency = <75000000>;
+	};
+
+	spi_nor: flash@1 {
+		u-boot,dm-spl;
+		compatible = "jedec,spi-nor";
+		label = "sfc_nor";
+		reg = <0>;
+		spi-tx-bus-width = <1>;
+		spi-rx-bus-width = <4>;
+		spi-max-frequency = <100000000>;
+	};
+};
+
+&saradc {
+	
+	status = "okay";
+};
+
+&sdmmc0 {
+	u-boot,dm-spl;
+	status = "okay";
+};
+
+&sdmmc0_pins {
+	u-boot,dm-spl;
+};
+
+&sdmmc0_bus4 {
+	u-boot,dm-spl;
+};
+
+&sdmmc0_clk {
+	u-boot,dm-spl;
+};
+
+&sdmmc0_cmd {
+	u-boot,dm-spl;
+};
+
+&sdmmc0_det {
+	u-boot,dm-spl;
+};
+
+&sdmmc1 {
+	u-boot,dm-spl;
+	/delete-property/ pinctrl-names;
+	/delete-property/ pinctrl-0;
+	status = "okay";
+};
+
+&sdhci {
+	bus-width = <8>;
+	u-boot,dm-spl;
+	/delete-property/ pinctrl-names;
+	/delete-property/ pinctrl-0;
+	mmc-hs200-1_8v;
+	status = "okay";
+};
+
+&gmac0_clkin {
+	
+};
+
+&gmac1_clkin {
+	
+};
+
+&gmac0 {
+	
+	phy-mode = "rgmii";
+	clock_in_out = "output";
+
+	snps,reset-gpio = <&gpio2 RK_PD3 GPIO_ACTIVE_LOW>;
+	snps,reset-active-low;
+	/* Reset time is 20ms, 100ms for rtl8211f */
+	snps,reset-delays-us = <0 20000 100000>;
+	assigned-clocks = <&cru SCLK_GMAC0_RX_TX>, <&cru SCLK_GMAC0>;
+	assigned-clock-parents = <&cru SCLK_GMAC0_RGMII_SPEED>;
+	assigned-clock-rates = <0>, <125000000>;
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&gmac0_miim
+		     &gmac0_tx_bus2
+		     &gmac0_rx_bus2
+		     &gmac0_rgmii_clk
+		     &gmac0_rgmii_bus>;
+
+	tx_delay = <0x3c>;
+	rx_delay = <0x2f>;
+
+	phy-handle = <&rgmii_phy0>;
+	status = "okay";
+};
+
+&gmac1 {
+	
+	phy-mode = "rgmii";
+	clock_in_out = "output";
+
+	snps,reset-gpio = <&gpio2 RK_PD1 GPIO_ACTIVE_LOW>;
+	snps,reset-active-low;
+	/* Reset time is 20ms, 100ms for rtl8211f */
+	snps,reset-delays-us = <0 20000 100000>;
+
+	assigned-clocks = <&cru SCLK_GMAC1_RX_TX>, <&cru SCLK_GMAC1>;
+	assigned-clock-parents = <&cru SCLK_GMAC1_RGMII_SPEED>;
+	assigned-clock-rates = <0>, <125000000>;
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&gmac1m1_miim
+		     &gmac1m1_tx_bus2
+		     &gmac1m1_rx_bus2
+		     &gmac1m1_rgmii_clk
+		     &gmac1m1_rgmii_bus>;
+
+	tx_delay = <0x4f>;
+	rx_delay = <0x26>;
+
+	phy-handle = <&rgmii_phy1>;
+	status = "okay";
+};
+
+&gmac0_stmmac_axi_setup {
+	
+};
+
+&gmac0_mtl_rx_setup {
+	
+	queue0 {
+		
+	};
+};
+
+&gmac0_mtl_tx_setup {
+	
+	queue0 {
+		
+	};
+};
+
+&gmac1_stmmac_axi_setup {
+	
+};
+
+&gmac1_mtl_rx_setup {
+	
+	queue0 {
+		
+	};
+};
+
+&gmac1_mtl_tx_setup {
+	
+	queue0 {
+		
+	};
+};
+
+&mdio0 {
+	
+	rgmii_phy0: phy@0 {
+		compatible = "ethernet-phy-ieee802.3-c22";
+		
+		reg = <0x0>;
+	};
+};
+
+&mdio1 {
+	
+	rgmii_phy1: phy@0 {
+		compatible = "ethernet-phy-ieee802.3-c22";
+		
+		reg = <0x0>;
+	};
+};
+
+&gmac0_miim {
+	
+};
+
+&gmac0_clkinout {
+	
+};
+
+&gmac0_rx_bus2 {
+	
+};
+
+&gmac0_tx_bus2 {
+	
+};
+
+&gmac0_rgmii_clk {
+	
+};
+
+&gmac0_rgmii_bus {
+	
+};
+
+&gmac1m1_miim {
+	
+};
+
+&gmac1m1_clkinout {
+	
+};
+
+&gmac1m1_rx_bus2 {
+	
+};
+
+&gmac1m1_tx_bus2 {
+	
+};
+
+&gmac1m1_rgmii_clk {
+	
+};
+
+&gmac1m1_rgmii_bus {
+	
+};
+
+&eth0_clkout_pins {
+	
+};
+
+&eth1m1_clkout_pins {
+	
+};
+
+&pcie30phy {
+	
+	status = "okay";
+};
+
+&pcie3x2 {
+	
+	status = "okay";
+};
+
+&pinctrl {
+	u-boot,dm-spl;
+	status = "okay";
+};
+
+&gpio0 {
+	u-boot,dm-spl;
+};
+
+&gpio1 {
+	u-boot,dm-spl;
+};
+
+&gpio2 {
+	u-boot,dm-spl;
+};
+
+&pcfg_pull_none_drv_level_1 {
+	u-boot,dm-spl;
+};
+
+&pcfg_pull_none_drv_level_2 {
+	u-boot,dm-spl;
+};
+
+
+&pcfg_pull_up_drv_level_1 {
+	u-boot,dm-spl;
+};
+
+&pcfg_pull_up_drv_level_2 {
+	u-boot,dm-spl;
+};
+
+&pcfg_pull_up {
+	u-boot,dm-spl;
+};
+
+&pcfg_pull_none {
+	u-boot,dm-spl;
+};
+
+&wdt {
+	
+	status = "okay";
+};
+
+
